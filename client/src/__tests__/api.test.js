@@ -22,4 +22,28 @@ describe("API Base URL configuration", () => {
     const { default: api } = await import("../services/api");
     expect(api.defaults.baseURL).toBe("http://localhost:5000/api");
   });
+
+  it("should call /auth/register with sanitized payload excluding confirm", async () => {
+    const { default: api } = await import("../services/api");
+    const postSpy = vi.spyOn(api, "post").mockResolvedValue({ data: { success: true } });
+    const { register } = await import("../services/authService");
+
+    await register({
+      name: "Farmer",
+      email: "farmer@test.local",
+      password: "password123",
+      confirm: "password123",
+      phone: "1234567890",
+      location: "Valley",
+    });
+
+    expect(postSpy).toHaveBeenCalledWith("/auth/register", {
+      name: "Farmer",
+      email: "farmer@test.local",
+      password: "password123",
+      phone: "1234567890",
+      location: "Valley",
+      role: "farmer",
+    });
+  });
 });

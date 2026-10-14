@@ -1,5 +1,6 @@
 const Activity = require("../models/Activity"),
   Notification = require("../models/Notification");
+const { isValidObjectId, isValidDate, isNonEmptyString } = require("../utils/validator");
 const statusOf = (a) =>
   a.status === "Completed"
     ? "Completed"
@@ -35,7 +36,48 @@ exports.get = async (req, res, next) => {
 };
 exports.create = async (req, res, next) => {
   try {
-    const a = await Activity.create({ ...req.body, user: req.user._id });
+    const { name, crop, scheduledDate, reminderDate, ...data } = req.body;
+
+    if (!isNonEmptyString(name)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Activity name is required" });
+    }
+
+    if (!isValidObjectId(crop)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Valid crop reference is required" });
+    }
+
+    if (!isValidDate(scheduledDate)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Valid scheduled date is required" });
+    }
+
+    if (reminderDate) {
+      if (!isValidDate(reminderDate)) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid reminder date" });
+      }
+      if (new Date(reminderDate) > new Date(scheduledDate)) {
+        return res.status(400).json({
+          success: false,
+          message: "Reminder date cannot be after scheduled date",
+        });
+      }
+    }
+
+    const a = await Activity.create({
+      ...data,
+      name: name.trim(),
+      crop,
+      scheduledDate,
+      reminderDate: reminderDate || null,
+      user: req.user._id,
+    });
     res.status(201).json({ success: true, data: a });
   } catch (e) {
     next(e);
@@ -43,6 +85,34 @@ exports.create = async (req, res, next) => {
 };
 exports.update = async (req, res, next) => {
   try {
+    const { name, crop, scheduledDate, reminderDate } = req.body;
+
+    if (name !== undefined && !isNonEmptyString(name)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Activity name cannot be empty" });
+    }
+
+    if (crop !== undefined && !isValidObjectId(crop)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid crop reference" });
+    }
+
+    if (scheduledDate !== undefined && !isValidDate(scheduledDate)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid scheduled date" });
+    }
+
+    if (reminderDate !== undefined && reminderDate !== null && reminderDate !== "") {
+      if (!isValidDate(reminderDate)) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid reminder date" });
+      }
+    }
+
     const a = await Activity.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
       req.body,

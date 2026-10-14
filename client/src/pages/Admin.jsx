@@ -4,12 +4,13 @@ import api from "../services/api";
 export default function Admin() {
   const [t, setT] = useState([]);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const [f, setF] = useState({
     name: "",
     category: "",
     description: "",
-    typicalDuration: 0,
+    typicalDuration: "",
   });
 
   const load = async () => {
@@ -30,23 +31,58 @@ export default function Admin() {
     load();
   }, []);
 
+  const handleChange = (field, value) => {
+    setF({
+      ...f,
+      [field]: value,
+    });
+    if (fieldErrors[field]) {
+      setFieldErrors({
+        ...fieldErrors,
+        [field]: "",
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const errs = {};
+    if (!f.name || !f.name.trim()) {
+      errs.name = "Template name is required";
+    }
+    if (!f.category || !f.category.trim()) {
+      errs.category = "Category is required";
+    }
+    if (
+      f.typicalDuration !== "" &&
+      (isNaN(Number(f.typicalDuration)) || Number(f.typicalDuration) <= 0)
+    ) {
+      errs.typicalDuration = "Typical duration must be a positive number of days";
+    }
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const save = async (e) => {
     e.preventDefault();
+    setError("");
+
+    if (!validateForm()) {
+      return;
+    }
 
     try {
-      setError("");
-
       await api.post("/crop-templates", {
         ...f,
-        typicalDuration: Number(f.typicalDuration),
+        typicalDuration: f.typicalDuration ? Number(f.typicalDuration) : 0,
       });
 
       setF({
         name: "",
         category: "",
         description: "",
-        typicalDuration: 0,
+        typicalDuration: "",
       });
+      setFieldErrors({});
 
       await load();
     } catch (e) {
@@ -78,43 +114,65 @@ export default function Admin() {
 
       {error && <div className="error">{error}</div>}
 
-      <form className="card form" onSubmit={save}>
+      <form className="card form" onSubmit={save} noValidate>
         <h2>Add Template</h2>
 
-        {[
-          "name",
-          "category",
-          "description",
-          "typicalDuration",
-        ].map((k) => (
-          <label key={k}>
-            {k.replace(/([A-Z])/g, " $1")}
+        <label>
+          Template Name *
+          <input
+            name="name"
+            value={f.name}
+            onChange={(e) => handleChange("name", e.target.value)}
+            className={fieldErrors.name ? "input-error" : ""}
+            placeholder="e.g. Basmati Rice"
+          />
+          {fieldErrors.name && (
+            <span className="field-error">{fieldErrors.name}</span>
+          )}
+        </label>
 
-            <input
-              name={k}
-              type={
-                k === "typicalDuration"
-                  ? "number"
-                  : "text"
-              }
-              value={f[k]}
-              onChange={(e) =>
-                setF({
-                  ...f,
-                  [e.target.name]: e.target.value,
-                })
-              }
-              required={k !== "description"}
-              min={
-                k === "typicalDuration"
-                  ? "0"
-                  : undefined
-              }
-            />
-          </label>
-        ))}
+        <label>
+          Category *
+          <input
+            name="category"
+            value={f.category}
+            onChange={(e) => handleChange("category", e.target.value)}
+            className={fieldErrors.category ? "input-error" : ""}
+            placeholder="e.g. Grains, Vegetables, Pulses"
+          />
+          {fieldErrors.category && (
+            <span className="field-error">{fieldErrors.category}</span>
+          )}
+        </label>
 
-        <button type="submit">Add</button>
+        <label>
+          Description
+          <textarea
+            name="description"
+            value={f.description}
+            onChange={(e) => handleChange("description", e.target.value)}
+            placeholder="Short details about this crop..."
+            rows={3}
+          />
+        </label>
+
+        <label>
+          Typical Duration (Days)
+          <input
+            name="typicalDuration"
+            type="number"
+            min="1"
+            value={f.typicalDuration}
+            onChange={(e) => handleChange("typicalDuration", e.target.value)}
+            className={fieldErrors.typicalDuration ? "input-error" : ""}
+            placeholder="e.g. 120"
+          />
+          {fieldErrors.typicalDuration && (
+            <span className="field-error">{fieldErrors.typicalDuration}</span>
+          )}
+        </label>
+
+        <button type="submit">Add Template</button>
       </form>
 
       <div className="grid">
@@ -146,4 +204,3 @@ export default function Admin() {
     </>
   );
 }
-

@@ -1,4 +1,5 @@
 const Template = require("../models/CropTemplate");
+const { isNonEmptyString, isValidNumber } = require("../utils/validator");
 exports.list = async (req, res, next) => {
   try {
     res.json({ success: true, data: await Template.find().sort({ name: 1 }) });
@@ -20,6 +21,18 @@ exports.get = async (req, res, next) => {
 };
 exports.create = async (req, res, next) => {
   try {
+    const { name, typicalDuration } = req.body;
+    if (!isNonEmptyString(name)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Template name is required" });
+    }
+    if (typicalDuration !== undefined && typicalDuration !== "" && !isValidNumber(typicalDuration, 1)) {
+      return res.status(400).json({
+        success: false,
+        message: "Typical growing duration must be a positive number of days",
+      });
+    }
     res
       .status(201)
       .json({ success: true, data: await Template.create(req.body) });

@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const token = require("../utils/token");
+const { isValidEmail, isNonEmptyString } = require("../utils/validator");
 
 exports.register = async (req, res, next) => {
   try {
@@ -14,10 +15,18 @@ exports.register = async (req, res, next) => {
     } = req.body;
 
     // Required fields
-    if (!name || !email || !password) {
+    if (!isNonEmptyString(name) || !isNonEmptyString(email) || !isNonEmptyString(password)) {
       return res.status(400).json({
         success: false,
         message: "Name, email and password are required",
+      });
+    }
+
+    // Email format validation
+    if (!isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address",
       });
     }
 
@@ -72,6 +81,20 @@ exports.login = async (req, res, next) => {
   try {
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password || "";
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address",
+      });
+    }
 
     const user = await User.findOne({
       email,

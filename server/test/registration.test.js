@@ -138,4 +138,36 @@ test("Registration API Tests", async (t) => {
     assert.notEqual(createdPayload.password, "secretPassword123"); // must be hashed
     assert.ok(await bcrypt.compare("secretPassword123", createdPayload.password));
   });
+
+  await t.test("gracefully handle database persistence/connection failure without leaking secrets", async () => {
+    User.findOne = async () => null;
+    User.create = async () => {
+      const err = new Error("connection to 10.0.0.1:27017 timed out");
+      err.name = "MongoNetworkError";
+      throw err;
+    };
+
+    const res = await request(app)
+      .post("/api/auth/register")
+      .send({
+        name: "Farmer Joe",
+        email: "farmer.joe@test.local",
+        password: "secretPassword123",
+      });
+
+    assert.equal(res.status, 503);
+    assert.equal(res.body.success, false);
+    assert.match(res.body.message, /database.*unavailable/i);
+    assert.ok(!JSON.stringify(res.body).includes("10.0.0.1"));
+  });
+
+  await t.test("reject malformed request body", async () => {
+    const res = await request(app)
+      .post("/api/auth/register")
+      .set("Content-Type", "application/json")
+      .send("invalid-json");
+
+    assert.ok(res.status >= 400 && res.status < 500);
+    assert.equal(res.body.success, false);
+  });
 });

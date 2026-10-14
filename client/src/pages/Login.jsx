@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 export default function Login() {
   const [email, setEmail] = useState(""),
@@ -7,7 +7,9 @@ export default function Login() {
     [error, setError] = useState("");
     
   const { login } = useAuth(),
-    nav = useNavigate();
+    nav = useNavigate(),
+    loc = useLocation();
+  const infoMessage = loc.state?.message;
   const submit = async (e) => {
     e.preventDefault();
     setError("");
@@ -23,6 +25,20 @@ export default function Login() {
       <form className="card form" onSubmit={submit}>
         <h1>Welcome back</h1>
         <p className="muted">Sign in to manage your crops.</p>
+        {infoMessage && !error && (
+          <div
+            className="pill completed"
+            style={{
+              display: "block",
+              textAlign: "center",
+              padding: "10px",
+              margin: "10px 0",
+              fontSize: "14px",
+            }}
+          >
+            {infoMessage}
+          </div>
+        )}
         {error && <div className="error">{error}</div>}
         <label>
           Email

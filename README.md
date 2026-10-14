@@ -27,6 +27,10 @@ React + Vite, React Router, Axios, CSS, Node.js, Express, MongoDB/Mongoose, JWT,
 5. In another terminal run `cd client && npm install && npm run dev`.
 6. Open http://localhost:5173.
 
+## Testing
+- Server tests: `cd server && npm test`
+- Client tests: `cd client && npm test`
+
 ## Environment
 Server: `PORT=5000`, `MONGO_URI=...`, `JWT_SECRET=...`, `CLIENT_URL=http://localhost:5173`.
 Client: `VITE_API_URL=http://localhost:5000/api`.

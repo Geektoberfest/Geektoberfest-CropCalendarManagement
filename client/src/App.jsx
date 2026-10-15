@@ -14,43 +14,46 @@ import Statistics from "./pages/Statistics";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import Activities from "./pages/Activities";
+import { ThemeProvider } from './context/ThemeContext';
 
 
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/crops" element={<Crops />} />
-          <Route path="/crops/add" element={<AddCrop />} />
-          <Route path="/crops/:id" element={<CropDetails />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/activities" element={<Activities />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/statistics" element={<Statistics />} />
-          <Route path="/profile" element={<Profile />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route
-            path="/admin"
             element={
-              <ProtectedRoute admin>
-                <Admin />
+              <ProtectedRoute>
+                <Layout />
               </ProtectedRoute>
             }
-          />
-        </Route>
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="*" element={<Navigate to="/dashboard" />} />
-      </Routes>
-    </AuthProvider>
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/crops" element={<Crops />} />
+            <Route path="/crops/add" element={<AddCrop />} />
+            <Route path="/crops/:id" element={<CropDetails />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/activities" element={<Activities />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/statistics" element={<Statistics />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute admin>
+                  <Admin />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

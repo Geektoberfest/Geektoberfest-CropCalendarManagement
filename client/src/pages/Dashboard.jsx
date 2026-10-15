@@ -4,6 +4,7 @@ import { dashboard } from "../services/dashboardService";
 import { completeActivity } from "../services/activityService";
 import StatCard from "../components/StatCard";
 import ActivityCard from "../components/ActivityCard";
+import WeatherWidget from "../components/WeatherWidget";
 
 export default function Dashboard() {
   const [d, setD] = useState(null);
@@ -67,6 +68,8 @@ export default function Dashboard() {
           />
         ))}
       </section>
+
+      <WeatherWidget />
 
       <h2>Today's Activities</h2>
 

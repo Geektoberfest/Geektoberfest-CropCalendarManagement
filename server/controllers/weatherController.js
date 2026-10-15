@@ -1,4 +1,5 @@
 const weatherService = require("../services/weatherService");
+const weatherAlertService = require("../services/weatherAlertService");
 const User = require("../models/User");
 
 /**
@@ -44,7 +45,6 @@ exports.getCurrentWeather = async (req, res, next) => {
       locationMeta.latitude = lat;
       locationMeta.longitude = lon;
     } else {
-      // Geocode place name or coordinate string
       try {
         const geo = await weatherService.geocodeLocation(location);
         coords = { latitude: geo.latitude, longitude: geo.longitude };
@@ -57,7 +57,6 @@ exports.getCurrentWeather = async (req, res, next) => {
       }
     }
 
-    // Retrieve 7-day forecast from Open-Meteo
     const forecast = await weatherService.getForecast({
       latitude: coords.latitude,
       longitude: coords.longitude,
@@ -90,7 +89,6 @@ exports.updateLocation = async (req, res, next) => {
     }
 
     const trimmed = location.trim();
-    // Validate that location can be resolved or is valid coords
     try {
       await weatherService.geocodeLocation(trimmed);
     } catch (err) {
@@ -108,10 +106,107 @@ exports.updateLocation = async (req, res, next) => {
     user.location = trimmed;
     await user.save();
 
+    // Trigger alert re-assessment for the new location
+    weatherAlertService.syncWeatherAlerts(user._id, user.location).catch(() => {});
+
     return res.json({
       success: true,
       message: "Farm location updated successfully",
       data: { location: user.location },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
+ * Get active weather alerts for authenticated user
+ */
+exports.getAlerts = async (req, res, next) => {
+  try {
+    const includeDismissed = req.query.includeDismissed === "true";
+    const userLocation = req.query.location || req.user.location;
+
+    // Synchronize alerts with current weather if location is available
+    if (userLocation) {
+      await weatherAlertService.syncWeatherAlerts(req.user._id, userLocation);
+    }
+
+    const alerts = await weatherAlertService.getUserAlerts(req.user._id, {
+      includeDismissed,
+    });
+
+    return res.json({
+      success: true,
+      data: alerts,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
+ * Mark a weather alert as read
+ */
+exports.markRead = async (req, res, next) => {
+  try {
+    const alert = await weatherAlertService.markAlertRead(
+      req.user._id,
+      req.params.id
+    );
+    if (!alert) {
+      return res.status(404).json({
+        success: false,
+        message: "Alert not found or unauthorized",
+      });
+    }
+    return res.json({
+      success: true,
+      data: alert,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
+ * Dismiss a weather alert
+ */
+exports.dismissAlert = async (req, res, next) => {
+  try {
+    const alert = await weatherAlertService.dismissAlert(
+      req.user._id,
+      req.params.id
+    );
+    if (!alert) {
+      return res.status(404).json({
+        success: false,
+        message: "Alert not found or unauthorized",
+      });
+    }
+    return res.json({
+      success: true,
+      data: alert,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+/**
+ * Force on-demand re-sync of weather alerts
+ */
+exports.refreshAlerts = async (req, res, next) => {
+  try {
+    const location = req.body?.location || req.user.location;
+    const alerts = await weatherAlertService.syncWeatherAlerts(
+      req.user._id,
+      location
+    );
+    return res.json({
+      success: true,
+      message: "Weather alerts refreshed successfully",
+      data: alerts,
     });
   } catch (error) {
     return next(error);

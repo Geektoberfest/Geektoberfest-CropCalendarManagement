@@ -505,3 +505,303 @@ select {
   }
 }
 
+/* =========================================================
+   Weather Alerts Section Styling
+   ========================================================= */
+.weather-alerts-card {
+  border-left: 4px solid #e59819;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 25px;
+}
+
+.weather-alerts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #edf3eb;
+  padding-bottom: 10px;
+}
+
+.weather-alerts-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.weather-alerts-title h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #1f3322;
+}
+
+.badge-alert-count {
+  background: #fdf2e2;
+  color: #b25e01;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.weather-alerts-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #556b53;
+  cursor: pointer;
+}
+
+.weather-alerts-empty {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #f2f8f0;
+  border: 1px solid #d6e8d2;
+  border-radius: 10px;
+  padding: 14px 18px;
+  color: #274c25;
+}
+
+.weather-alerts-empty p {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.weather-alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.weather-alert-item {
+  display: flex;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fcfdfc;
+  border: 1px solid #e4ece2;
+  border-left-width: 4px;
+  transition: box-shadow 0.2s ease;
+}
+
+.weather-alert-item:hover {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.weather-alert-item.critical {
+  border-left-color: #b43c35;
+  background: #fffafa;
+}
+
+.weather-alert-item.warning {
+  border-left-color: #e59819;
+  background: #fffdf9;
+}
+
+.weather-alert-item.dismissed {
+  opacity: 0.6;
+  background: #f7f9f6;
+  border-left-color: #a0afa0;
+}
+
+.alert-left-indicator {
+  padding-top: 2px;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+}
+
+.category-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.category-pill.irrigation {
+  background: #e1f2fb;
+  color: #0369a1;
+}
+
+.category-pill.spraying {
+  background: #f5e8fd;
+  color: #7e22ce;
+}
+
+.category-pill.fertilizer {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.category-pill.planting {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.category-pill.harvesting {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.alert-crop-name {
+  color: #4a5d48;
+}
+
+.alert-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #637860;
+}
+
+.dismissed-pill {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.alert-title {
+  margin: 0 0 4px 0;
+  font-size: 0.98rem;
+  color: #1b2e1e;
+  font-weight: 700;
+}
+
+.alert-message {
+  margin: 0 0 8px 0;
+  font-size: 0.88rem;
+  color: #3f523f;
+  line-height: 1.4;
+}
+
+.alert-recommendation {
+  background: rgba(40, 122, 62, 0.07);
+  border-left: 3px solid #287a3e;
+  padding: 6px 10px;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.83rem;
+  color: #214324;
+  margin-bottom: 8px;
+}
+
+.alert-weather-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.weather-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  background: #edf4ea;
+  color: #345032;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.alert-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* =========================================================
+   Activity Card Weather Alert Badge
+   ========================================================= */
+.card.activity {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.card.activity.has-weather-alert {
+  border-left: 4px solid #e59819;
+}
+
+.activity-info {
+  flex: 1;
+}
+
+.activity-main-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.activity-weather-warning {
+  margin-top: 8px;
+}
+
+.activity-weather-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  background: #fdf5ea;
+  color: #a45802;
+  border: 1px solid #f6deb8;
+  transition: background 0.15s;
+}
+
+.activity-weather-badge:hover {
+  background: #fbeed9;
+}
+
+.activity-weather-badge.critical {
+  background: #fdf1f1;
+  color: #a8241c;
+  border-color: #f7cecc;
+}
+
+.activity-weather-details {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: #fbfdfa;
+  border: 1px solid #e3ede1;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #384d36;
+}
+
+.activity-weather-details p {
+  margin: 0 0 4px 0;
+}
+
+.text-warning {
+  color: #e59819;
+}
+.text-info {
+  color: #0284c7;
+}
+
+

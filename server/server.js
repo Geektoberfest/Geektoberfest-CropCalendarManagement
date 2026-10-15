@@ -33,6 +33,7 @@ app.use("/api/activities", require("./routes/activities"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/crop-templates", require("./routes/templates"));
 app.use("/api/dashboard", require("./routes/dashboard"));
+app.use("/api/weather", require("./routes/weather"));
 app.use(error);
 
 const port = process.env.PORT || 5000;

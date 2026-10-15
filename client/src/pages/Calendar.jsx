@@ -1,15 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   getActivities,
   completeActivity,
 } from "../services/activityService";
+import { getWeatherAlerts } from "../services/weatherService";
 import ActivityCard from "../components/ActivityCard";
 
 export default function Calendar() {
   const [a, setA] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+
+  const loadAlerts = async () => {
+    try {
+      const res = await getWeatherAlerts({ includeDismissed: false });
+      if (res.data?.success && res.data?.data) {
+        setAlerts(res.data.data);
+      }
+    } catch {
+      // alerts are non-critical
+    }
+  };
 
   const load = async () => {
     try {
@@ -21,6 +34,7 @@ export default function Calendar() {
       });
 
       setA(r.data.data);
+      await loadAlerts();
     } catch (e) {
       setError(
         e.response?.data?.message ||
@@ -32,6 +46,16 @@ export default function Calendar() {
   useEffect(() => {
     load();
   }, [status]);
+
+  const alertsByActivity = useMemo(() => {
+    const map = {};
+    for (const alert of alerts) {
+      if (alert.activity && !alert.isDismissed) {
+        map[alert.activity] = alert;
+      }
+    }
+    return map;
+  }, [alerts]);
 
   const handleComplete = async (id) => {
     try {
@@ -79,6 +103,7 @@ export default function Calendar() {
           key={x._id}
           a={x}
           onComplete={handleComplete}
+          weatherAlert={alertsByActivity[x._id]}
         />
       ))}
 

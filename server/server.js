@@ -33,12 +33,17 @@ app.use("/api/activities", require("./routes/activities"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/crop-templates", require("./routes/templates"));
 app.use("/api/dashboard", require("./routes/dashboard"));
+app.use("/api/weather", require("./routes/weather"));
 app.use(error);
 
 const port = process.env.PORT || 5000;
-db()
-  .then(() => app.listen(port, () => console.log(`API listening on ${port}`)))
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
+if (require.main === module) {
+  db()
+    .then(() => app.listen(port, () => console.log(`API listening on ${port}`)))
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    });
+}
+
+module.exports = app;

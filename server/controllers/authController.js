@@ -2,8 +2,17 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const token = require("../utils/token");
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 exports.register = async (req, res, next) => {
   try {
+    if (!req.body || typeof req.body !== "object") {
+      return res.status(400).json({
+        success: false,
+        message: "Request body is required",
+      });
+    }
+
     const {
       name,
       email,
@@ -13,15 +22,31 @@ exports.register = async (req, res, next) => {
       role = "farmer",
     } = req.body;
 
-    // Required fields
-    if (!name || !email || !password) {
+    // Required fields check (types & non-empty strings)
+    if (
+      typeof name !== "string" ||
+      !name.trim() ||
+      typeof email !== "string" ||
+      !email.trim() ||
+      typeof password !== "string" ||
+      !password
+    ) {
       return res.status(400).json({
         success: false,
         message: "Name, email and password are required",
       });
     }
 
-    // Password validation
+    // Email format validation
+    const trimmedEmail = email.trim();
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address",
+      });
+    }
+
+    // Password validation (do NOT silently alter password)
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
@@ -29,8 +54,8 @@ exports.register = async (req, res, next) => {
       });
     }
 
-    // Normalize email
-    const normalizedEmail = email.trim().toLowerCase();
+    // Normalize email consistently
+    const normalizedEmail = trimmedEmail.toLowerCase();
 
     // Check if email already exists
     const existingUser = await User.findOne({
@@ -44,13 +69,19 @@ exports.register = async (req, res, next) => {
       });
     }
 
+    // Trim string fields
+    const trimmedName = name.trim();
+    const trimmedPhone = typeof phone === "string" ? phone.trim() : phone;
+    const trimmedLocation =
+      typeof location === "string" ? location.trim() : location;
+
     // Create user
     const user = await User.create({
-      name: name.trim(),
+      name: trimmedName,
       email: normalizedEmail,
       password: await bcrypt.hash(password, 10),
-      phone,
-      location,
+      phone: trimmedPhone,
+      location: trimmedLocation,
 
       // Never allow public registration as admin
       role: role === "admin" ? "farmer" : role,
@@ -64,6 +95,26 @@ exports.register = async (req, res, next) => {
       },
     });
   } catch (error) {
+    // Handle MongoDB duplicate key error (race conditions on unique index)
+    if (
+      error.code === 11000 ||
+      (error.name === "MongoServerError" && error.code === 11000)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered",
+      });
+    }
+
+    // Handle Mongoose validation errors
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((e) => e.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(", ") || "Validation error",
+      });
+    }
+
     next(error);
   }
 };

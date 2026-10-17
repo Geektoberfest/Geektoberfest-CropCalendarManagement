@@ -16,6 +16,8 @@ const s = new mongoose.Schema(
     category: String,
     description: String,
     typicalDuration: Number,
+    sowingSeason: { type: String, default: "" },
+    image: { type: String, default: "" },
     activities: [activity],
   },
   { timestamps: true },
